@@ -1,6 +1,8 @@
-# Sonos Arc Controller
+# Sonos Controller
 
-A local web app for controlling a Sonos Arc (or any Sonos speaker) with saved audio profiles, scheduling, and automatic session detection. Built with React + Vite, talks to your Sonos over [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api).
+A local web app for controlling Sonos speakers with saved audio profiles, scheduling, and automatic session detection. Built with React + Vite, talks to your Sonos over [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api).
+
+![Screenshot](docs/screenshot.png)
 
 ---
 
@@ -76,7 +78,7 @@ cd node-sonos-http-api
 pm2 start server.js --name sonos-api
 
 # Start this app
-cd sonos-arc-controller
+cd sonos-controller
 pm2 start ecosystem.config.cjs
 
 # Save the process list so it restores after reboot
