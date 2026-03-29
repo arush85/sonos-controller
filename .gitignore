@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Claude Code — contains personal permissions and local test URLs
+.claude/
+
+# PM2 logs and runtime data
+logs/
+*.log
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
