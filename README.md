@@ -42,7 +42,7 @@ By default it runs on port `5005`. Verify it's working by opening `http://localh
 ### 2. Install and run this app
 
 ```bash
-git clone https://github.com/arush85/sonos-controller.git
+git clone https://github.com/tonypest0/sonos-controller.git
 cd sonos-controller
 npm install
 npm run dev
