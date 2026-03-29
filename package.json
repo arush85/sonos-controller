@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Local web app for controlling Sonos speakers with audio profiles, scheduling, and session detection",
   "keywords": ["sonos", "arc", "audio", "controller", "home-audio"],
-  "license": "MIT",
+  "license": "CC-BY-NC-4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
