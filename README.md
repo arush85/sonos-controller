@@ -15,8 +15,8 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 - **Per-track album art** — uses the Sonos device's `/getaa` endpoint so individual track art is shown correctly (including YouTube Music liked-songs playlists, which would otherwise show playlist art)
 
 ### Speaker Groups
-- **Kitchen merge toggle** — add or remove the Kitchen speaker from the group with one tap
-- **Group header** — header shows "Living Room + Kitchen" (or all member names) when speakers are grouped
+- **Speaker grouping** — add or remove other speakers from the group with one tap; detected automatically, no room names hardcoded
+- **Group header** — header shows all grouped room names when speakers are grouped
 - **Group-aware volume** — Live Controls reads and writes group volume when speakers are grouped, matching what the Sonos app displays
 
 ### Audio Profiles

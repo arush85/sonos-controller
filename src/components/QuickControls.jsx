@@ -110,8 +110,10 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
     interactingTimerRef.current = setTimeout(() => { interactingRef.current = false }, 2000)
   }
 
-  const [kitchenGrouped, setKitchenGrouped] = useState(null)
-  const [kitchenPending, setKitchenPending] = useState(false)
+  // otherRoom: the room available to group/ungroup with (detected dynamically from /zones)
+  const [otherRoom, setOtherRoom] = useState(null)
+  const [isGrouped, setIsGrouped] = useState(null)
+  const [groupPending, setGroupPending] = useState(false)
 
   const pollZones = useCallback(() => {
     if (!config?.host || !config?.port || !config?.room) return
@@ -121,8 +123,21 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
       .then(zones => {
         const zone = zones.find(z => z.members.some(m => m.roomName === config.room))
         if (!zone) return
-        // Kitchen grouping (always update — independent of slider interaction)
-        setKitchenGrouped(!!zone.members.some(m => m.roomName === 'Kitchen'))
+
+        // Detect grouping state dynamically — no hardcoded room names
+        const groupedWith = zone.members.map(m => m.roomName).filter(n => n !== config.room)
+        const available = zones
+          .filter(z => !z.members.some(m => m.roomName === config.room))
+          .flatMap(z => z.members.map(m => m.roomName))
+
+        if (groupedWith.length > 0) {
+          setIsGrouped(true)
+          setOtherRoom(groupedWith[0])
+        } else {
+          setIsGrouped(false)
+          if (available.length > 0) setOtherRoom(available[0])
+        }
+
         // Sliders: skip update while user is dragging
         if (interactingRef.current) return
         const coord = zone.coordinator
@@ -157,21 +172,21 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
     if (typeof appliedProfile.treble === 'number') setTreble(appliedProfile.treble)
   }, [appliedProfile])
 
-  const handleKitchenToggle = async () => {
-    if (kitchenPending) return
-    setKitchenPending(true)
+  const handleGroupToggle = async () => {
+    if (groupPending || !otherRoom) return
+    setGroupPending(true)
     try {
-      if (kitchenGrouped) {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/Kitchen/leave`)}`)
+      if (isGrouped) {
+        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(otherRoom)}/leave`)}`)
       } else {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/add/Kitchen`)}`)
+        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/add/${encodeURIComponent(otherRoom)}`)}`)
       }
       setTimeout(pollZones, 1000)
     } catch {}
-    setKitchenPending(false)
+    setGroupPending(false)
   }
 
-  const volApply = useDebouncedApply(config, kitchenGrouped ? 'groupvolume' : 'volume')
+  const volApply = useDebouncedApply(config, isGrouped ? 'groupvolume' : 'volume')
   const subApply = useDebouncedApply(config, 'sub/gain')
   const bassApply = useDebouncedApply(config, 'bass')
   const trebleApply = useDebouncedApply(config, 'treble')
@@ -284,18 +299,20 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
         />
       </div>
 
-      <div className="quick-group-row">
-        <button
-          className={`quick-group-btn ${kitchenGrouped ? 'grouped' : ''}`}
-          onClick={handleKitchenToggle}
-          disabled={kitchenPending || kitchenGrouped === null}
-        >
-          {kitchenGrouped
-            ? <><Unlink2 size={13} /> Ungroup Kitchen</>
-            : <><Link2 size={13} /> Group with Kitchen</>
-          }
-        </button>
-      </div>
+      {otherRoom && (
+        <div className="quick-group-row">
+          <button
+            className={`quick-group-btn ${isGrouped ? 'grouped' : ''}`}
+            onClick={handleGroupToggle}
+            disabled={groupPending || isGrouped === null}
+          >
+            {isGrouped
+              ? <><Unlink2 size={13} /> Ungroup Speakers</>
+              : <><Link2 size={13} /> Group Speakers</>
+            }
+          </button>
+        </div>
+      )}
       </div>
     </div>
   )
