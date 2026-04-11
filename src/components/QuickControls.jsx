@@ -291,8 +291,8 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
           disabled={kitchenPending || kitchenGrouped === null}
         >
           {kitchenGrouped
-            ? <><Unlink2 size={13} /> Kitchen — tap to separate</>
-            : <><Link2 size={13} /> Add Kitchen</>
+            ? <><Unlink2 size={13} /> Ungroup Kitchen</>
+            : <><Link2 size={13} /> Group with Kitchen</>
           }
         </button>
       </div>
