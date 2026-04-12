@@ -8,124 +8,92 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ## Features
 
-### Playback
-- **Now Playing card** — shows current track title, artist, album, and album art with animated EQ bars while playing
-- **Transport controls** — play/pause, previous, and next track directly from the controller
-- **Queue view** — see the full current queue with per-track thumbnails and active track highlight
-- **Per-track album art** — uses the Sonos device's `/getaa` endpoint so individual track art is shown correctly (including YouTube Music liked-songs playlists, which would otherwise show playlist art)
+### Now Playing
+- See what's currently playing — track title, artist, album, and album art update in real time
+- Control playback (play, pause, skip, previous) without opening the Sonos app
+- View the full queue so you know what's coming up next
+- Album art always shows the correct artwork for the track that's actually playing
 
-### Speaker Groups
-- **Speaker grouping** — add or remove other speakers from the group with one tap; detected automatically, no room names hardcoded
-- **Group header** — header shows all grouped room names when speakers are grouped
-- **Group-aware volume** — Live Controls reads and writes group volume when speakers are grouped, matching what the Sonos app displays
+### Speaker Grouping
+- Combine multiple speakers into one group with a single tap, or split them back apart
+- Volume controls automatically adjust to affect the whole group — no more one speaker being louder than another
+- The header updates to show which speakers are currently playing together
 
-### Audio Profiles
-- **Saved profiles** — named presets with volume, bass, treble, night mode, speech enhancement, and subwoofer settings
-- **One-click apply** — apply any profile instantly, or capture your current Sonos settings as a new profile
-- **Re-apply** — quickly re-apply the active profile from the now-playing strip
+### Sound Profiles
+- Save your favourite sound settings as named profiles — for example "Movie Night", "Music", or "Late Night"
+- Each profile remembers volume, bass, treble, night mode, speech enhancement, and subwoofer settings
+- Apply any profile in one tap, or snapshot your current Sonos settings directly into a new profile
 
-### Automation
-- **Scheduler** — automatically apply a profile on specific days and times
-- **Session watcher** — detects when playback starts and sets a startup volume automatically
+### Scheduling
+- Set profiles to apply automatically at specific times on specific days — useful for a consistent start-of-evening sound level without touching anything
+- The activity log keeps a record of every change so you always know what was applied and when
 
 ### Live Controls
-- **Real-time sliders** — adjust volume, bass, treble, and subwoofer gain without overwriting saved profiles
-- **Subwoofer toggle** — enable/disable the subwoofer with a live switch
+- Fine-tune volume, bass, treble, and subwoofer in real time using sliders — without touching your saved profiles
+- Toggle the subwoofer on or off on the fly
 
-### General
-- **Activity log** — tracks every profile change, schedule trigger, and setting adjustment
-- **Persistent storage** — data stored in both localStorage and a local `sonos-data.json` file so settings survive port changes and browser clears
-- **Run on lock** — can be set up as a macOS launchd daemon so the controller stays running even when the Mac is locked
+### Always On
+- Can run as a background service on macOS so the controller is always available — even when the Mac is asleep or locked
+- Settings are saved locally and survive restarts, browser clears, and port changes
 
 ---
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) v18 or later
-- [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api) running on your local network
+- macOS (the install script sets everything else up automatically)
 - A Sonos speaker reachable on your local network
 
 ---
 
-## Setup
+## Installation
 
-### 1. Start node-sonos-http-api
-
-This app talks to your Sonos through node-sonos-http-api. If you haven't set it up yet:
-
-```bash
-git clone https://github.com/jishi/node-sonos-http-api.git
-cd node-sonos-http-api
-npm install
-npm start
-```
-
-By default it runs on port `5005`. Verify it's working by opening `http://localhost:5005/zones` in your browser — you should see your Sonos zones listed.
-
-### 2. Install and run this app
+Clone the repo, then run the install script:
 
 ```bash
 git clone https://github.com/tonypest0/sonos-controller.git
 cd sonos-controller
-npm install
-npm run dev
+bash install.sh
 ```
 
-Open `http://localhost:5173` in your browser.
+The script will:
+1. Install Node.js via Homebrew if it isn't already present
+2. Install all dependencies and build the app
+3. Clone and install [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api) alongside it
+4. Ask for your Sonos room name and preferred ports
+5. Set up two background services (launchd daemons) that start automatically at boot — even when the Mac is locked
 
-### 3. Configure the connection
+Once complete, open `http://localhost:3000` in your browser.
 
-On first launch, go to **Settings** and enter:
+> **Finding your room name:** Open the Sonos app, tap your speaker — the name shown there (case-sensitive) is what to enter during setup.
 
-- **Host** — IP address or hostname of the machine running node-sonos-http-api (use `localhost` if it's the same machine)
-- **Port** — `5005` (default)
-- **Room name** — the exact name of your Sonos room as shown in the Sonos app (e.g. `Living Room`)
+### Updating
 
-Hit **Test Connection** to confirm everything is working.
-
-> **Finding your room name:** Open the Sonos app on your phone, tap the room/speaker name — that exact string (case-sensitive) is what to enter here.
-
----
-
-## Running as a background service (macOS launchd)
-
-For a Mac that should keep the controller running at all times — including when locked — use launchd daemons instead of PM2. This runs both services as system-level daemons that start at boot without requiring a login.
-
-Create a plist for node-sonos-http-api at `/Library/LaunchDaemons/com.sonos.api.plist` and one for this app at `/Library/LaunchDaemons/com.sonos.controller.plist`, then load them with:
+To pull the latest version and rebuild:
 
 ```bash
-sudo launchctl load /Library/LaunchDaemons/com.sonos.api.plist
-sudo launchctl load /Library/LaunchDaemons/com.sonos.controller.plist
+git pull
+npm run build
+sudo launchctl kickstart -k system/com.sonos.controller
 ```
-
----
-
-## Running in the background with PM2
-
-To keep both services running persistently using PM2 (survives terminal close, auto-restarts on crash):
-
-```bash
-npm install -g pm2
-
-# Start node-sonos-http-api
-cd node-sonos-http-api
-pm2 start server.js --name sonos-api
-
-# Start this app
-cd sonos-controller
-pm2 start ecosystem.config.cjs
-
-# Save the process list so it restores after reboot
-pm2 save
-```
-
-The included `ecosystem.config.cjs` is pre-configured for this project.
 
 ---
 
 ## How CORS is handled
 
-The Sonos API does not send CORS headers, so browsers block direct requests to it. This app includes a lightweight proxy built into the Vite dev server (`vite.config.js`) that forwards all API calls from the browser through Node.js — no browser CORS issues, no extra configuration needed.
+The Sonos API does not send CORS headers, so browsers block direct requests to it. Both the development server (`vite.config.js`) and the production server (`server.js`) include a lightweight proxy that forwards all API calls from the browser through Node.js — no browser CORS issues, no extra configuration needed.
+
+---
+
+## Development
+
+To run a local dev server with hot reload:
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. The Vite dev server includes the same proxy and store middleware as the production server, so everything works identically.
 
 ---
 
@@ -139,7 +107,7 @@ src/
     ProfileCard.jsx        # Single profile display + apply button
     ProfileEditor.jsx      # Create / edit profile form
     Queue.jsx              # Current queue panel with thumbnails
-    QuickControls.jsx      # Live sliders + kitchen group toggle
+    QuickControls.jsx      # Live sliders + speaker group toggle
     Scheduler.jsx          # Schedule list + add form
     ActivityLog.jsx        # Event history log
   hooks/
@@ -154,7 +122,9 @@ src/
     sonosArt.js            # Album art URL resolution helper
   App.jsx
   main.jsx
-ecosystem.config.cjs       # PM2 config
+server.js                  # Production server (static files + proxy + store)
+install.sh                 # One-command installer for macOS
+vite.config.js             # Dev server with proxy + store middleware
 ```
 
 ---
