@@ -47,6 +47,8 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ## Installation
 
+### macOS
+
 Clone the repo, then run the install script:
 
 ```bash
@@ -64,16 +66,42 @@ The script will:
 
 Once complete, open `http://localhost:3000` in your browser.
 
+### Windows
+
+Open PowerShell **as Administrator**, then run:
+
+```powershell
+git clone https://github.com/tonypest0/sonos-controller.git
+cd sonos-controller
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\install.ps1
+```
+
+The script will:
+1. Install Node.js via winget if it isn't already present
+2. Install all dependencies and build the app
+3. Clone and install [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api) alongside it
+4. Ask for your Sonos room name and preferred ports
+5. Register two Windows scheduled tasks under `\Sonos\` that start at boot and restart automatically on failure
+
+Once complete, open `http://localhost:3000` in your browser.
+
 > **Finding your room name:** Open the Sonos app, tap your speaker — the name shown there (case-sensitive) is what to enter during setup.
 
 ### Updating
 
-To pull the latest version and rebuild:
-
+**macOS:**
 ```bash
 git pull
 npm run build
 sudo launchctl kickstart -k system/com.sonos.controller
+```
+
+**Windows** (run as Administrator):
+```powershell
+git pull
+npm run build
+Restart-ScheduledTask -TaskPath "\Sonos" -TaskName "SonosController"
 ```
 
 ---
