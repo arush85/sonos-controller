@@ -68,21 +68,8 @@ npm run build
 
 Write-Ok "Build complete -- output in dist\"
 
-# ── node-sonos-http-api ───────────────────────────────────────────────────────
-
-Write-Step "Setting up node-sonos-http-api"
-
-$ApiDir = Join-Path $InstallDir "node-sonos-http-api"
-
-if (Test-Path $ApiDir) {
-    Write-Ok "node-sonos-http-api already present, skipping clone"
-} else {
-    git clone https://github.com/jishi/node-sonos-http-api.git $ApiDir
-    Set-Location $ApiDir
-    npm install --omit=dev
-    Set-Location $InstallDir
-    Write-Ok "node-sonos-http-api installed"
-}
+$ApiDir = Join-Path $InstallDir "node_modules\node-sonos-http-api"
+Write-Ok "node-sonos-http-api ready at node_modules\node-sonos-http-api"
 
 # ── Config ────────────────────────────────────────────────────────────────────
 

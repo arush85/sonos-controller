@@ -40,8 +40,9 @@ A local web app for controlling Sonos speakers with saved audio profiles, schedu
 
 ## Requirements
 
-- macOS (the install script sets everything else up automatically)
+- macOS or Windows
 - A Sonos speaker reachable on your local network
+- That's it — Node.js, node-sonos-http-api, and all other dependencies are installed automatically by the install script
 
 ---
 
@@ -59,8 +60,8 @@ bash install.sh
 
 The script will:
 1. Install Node.js via Homebrew if it isn't already present
-2. Install all dependencies and build the app
-3. Clone and install [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api) alongside it
+2. Run `npm install` — this pulls in all dependencies including [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api)
+3. Build the app
 4. Ask for your Sonos room name and preferred ports
 5. Set up two background services (launchd daemons) that start automatically at boot — even when the Mac is locked
 
@@ -79,8 +80,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 The script will:
 1. Install Node.js via winget if it isn't already present
-2. Install all dependencies and build the app
-3. Clone and install [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api) alongside it
+2. Run `npm install` — this pulls in all dependencies including [node-sonos-http-api](https://github.com/jishi/node-sonos-http-api)
+3. Build the app
 4. Ask for your Sonos room name and preferred ports
 5. Register two Windows scheduled tasks under `\Sonos\` that start at boot and restart automatically on failure
 
@@ -109,6 +110,8 @@ Restart-ScheduledTask -TaskPath "\Sonos" -TaskName "SonosController"
 ## How CORS is handled
 
 The Sonos API does not send CORS headers, so browsers block direct requests to it. Both the development server (`vite.config.js`) and the production server (`server.js`) include a lightweight proxy that forwards all API calls from the browser through Node.js — no browser CORS issues, no extra configuration needed.
+
+node-sonos-http-api is included as an npm dependency and installed automatically with `npm install`. It runs as a separate process alongside the controller server.
 
 ---
 

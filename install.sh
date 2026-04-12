@@ -51,7 +51,7 @@ ok "git"
 
 NODE_PATH="$(which node)"
 
-# ── Install controller dependencies & build ───────────────────────────────────
+# ── Install dependencies & build ─────────────────────────────────────────────
 step "Installing dependencies and building the app"
 
 cd "$INSTALL_DIR"
@@ -59,20 +59,8 @@ npm install
 npm run build
 ok "Build complete — output in dist/"
 
-# ── Set up node-sonos-http-api ────────────────────────────────────────────────
-step "Setting up node-sonos-http-api"
-
-SONOS_API_DIR="$INSTALL_DIR/node-sonos-http-api"
-
-if [ -d "$SONOS_API_DIR" ]; then
-  ok "node-sonos-http-api already present, skipping clone"
-else
-  git clone https://github.com/jishi/node-sonos-http-api.git "$SONOS_API_DIR"
-  cd "$SONOS_API_DIR"
-  npm install --omit=dev
-  cd "$INSTALL_DIR"
-  ok "node-sonos-http-api installed"
-fi
+SONOS_API_DIR="$INSTALL_DIR/node_modules/node-sonos-http-api"
+ok "node-sonos-http-api ready at node_modules/node-sonos-http-api"
 
 # ── Gather config from user ───────────────────────────────────────────────────
 step "Configuring your Sonos connection"

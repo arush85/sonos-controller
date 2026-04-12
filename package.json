@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
+    "node-sonos-http-api": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
