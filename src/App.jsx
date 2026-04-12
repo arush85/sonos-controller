@@ -541,7 +541,7 @@ export default function App() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Arc Controller</span>
-                  <span style={{ color: 'var(--text-muted)' }}>v1.0.0</span>
+                  <span style={{ color: 'var(--text-muted)' }}>v1.3.0</span>
                 </div>
                 <div style={{ color: 'var(--text-muted)', fontSize: 11, lineHeight: 1.6 }}>
                   Connects to node-sonos-http-api to control your Sonos Arc.
