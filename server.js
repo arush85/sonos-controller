@@ -38,11 +38,17 @@ const MIME = {
 // ── Static file server with SPA fallback ──────────────────────────────────────
 
 async function serveStatic(req, res) {
-  const urlPath  = req.url.split('?')[0]
-  const filePath = path.join(DIST_DIR, urlPath)
+  let urlPath = req.url.split('?')[0]
+  try {
+    urlPath = decodeURIComponent(urlPath)
+  } catch {
+    // ignore invalid encoding
+  }
+  const resolvedDist = path.resolve(DIST_DIR)
+  const filePath = path.resolve(DIST_DIR, '.' + urlPath)
 
   // Security: prevent path traversal outside dist/
-  if (!filePath.startsWith(DIST_DIR)) {
+  if (!filePath.startsWith(resolvedDist + path.sep) && filePath !== resolvedDist) {
     res.statusCode = 403
     res.end('Forbidden')
     return
@@ -103,9 +109,18 @@ function handleStore(req, res) {
         const existing = await fs.promises.readFile(DATA_FILE, 'utf8')
           .then(raw => JSON.parse(raw))
           .catch(()  => ({}))
+
+        // Security: Prevent prototype pollution
+        for (const key in updates) {
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            continue
+          }
+          existing[key] = updates[key]
+        }
+
         await fs.promises.writeFile(
           DATA_FILE,
-          JSON.stringify({ ...existing, ...updates }, null, 2),
+          JSON.stringify(existing, null, 2),
         )
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
