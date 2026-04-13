@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trash2, Clock } from 'lucide-react'
 import { formatNextActivation } from '../hooks/useScheduler'
+import ToggleSwitch from './ToggleSwitch'
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const DAY_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -171,38 +172,29 @@ export default function Scheduler({ schedules, profiles, onAdd, onUpdate, onDele
                 </div>
 
                 <div className="schedule-actions">
-                  <label className="toggle-switch" style={{ width: 40, height: 24 }}>
-                    <input
-                      type="checkbox"
-                      checked={schedule.enabled}
-                      onChange={(e) => {
-                        const newEnabled = e.target.checked
-                        onLog?.({
-                          type: 'setting_toggled',
-                          action: newEnabled ? 'Schedule Enabled' : 'Schedule Disabled',
-                          what: `${getProfileName(schedule.profileId)} at ${schedule.time}`,
-                          before: schedule.enabled,
-                          after: newEnabled,
-                        })
-                        onUpdate(schedule.id, { enabled: newEnabled })
-                      }}
-                    />
-                    <div
-                      className="toggle-track"
-                      style={{ borderRadius: 12 }}
-                    />
-                    <div
-                      className="toggle-thumb"
-                      style={{
-                        width: 18,
-                        height: 18,
-                        top: 3,
-                        left: 3,
-                        transform: schedule.enabled ? 'translateX(16px)' : 'none',
-                        transition: 'transform 0.2s',
-                      }}
-                    />
-                  </label>
+                  <ToggleSwitch
+                    checked={schedule.enabled}
+                    onChange={(newEnabled) => {
+                      onLog?.({
+                        type: 'setting_toggled',
+                        action: newEnabled ? 'Schedule Enabled' : 'Schedule Disabled',
+                        what: `${getProfileName(schedule.profileId)} at ${schedule.time}`,
+                        before: schedule.enabled,
+                        after: newEnabled,
+                      })
+                      onUpdate(schedule.id, { enabled: newEnabled })
+                    }}
+                    style={{ width: 40, height: 24 }}
+                    trackStyle={{ borderRadius: 12 }}
+                    thumbStyle={{
+                      width: 18,
+                      height: 18,
+                      top: 3,
+                      left: 3,
+                      transform: schedule.enabled ? 'translateX(16px)' : 'none',
+                      transition: 'transform 0.2s',
+                    }}
+                  />
 
                   <button
                     className="icon-btn danger"

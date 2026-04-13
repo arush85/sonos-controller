@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Pencil, Trash2, Play } from 'lucide-react'
+import { sliderGradientStyle } from '../lib/utils'
 
 export default function ProfileCard({
   profile,
@@ -49,9 +50,7 @@ export default function ProfileCard({
             onVolumeChange(profile, v)
           }}
           onClick={(e) => e.stopPropagation()}
-          style={{
-            background: `linear-gradient(to right, var(--accent-primary) ${liveVolume}%, var(--border) ${liveVolume}%)`,
-          }}
+          style={sliderGradientStyle(liveVolume, 0, 100)}
         />
       </div>
 
@@ -88,11 +87,7 @@ export default function ProfileCard({
             onSubwooferChange(profile, v)
           }}
           onClick={(e) => e.stopPropagation()}
-          style={{
-            background: profile.subwooferEnabled
-              ? `linear-gradient(to right, var(--accent-primary) ${((liveSubGain + 15) / 30) * 100}%, var(--border) ${((liveSubGain + 15) / 30) * 100}%)`
-              : 'var(--border)',
-          }}
+          style={profile.subwooferEnabled ? sliderGradientStyle(liveSubGain, -15, 15) : { background: 'var(--border)' }}
         />
       </div>
 

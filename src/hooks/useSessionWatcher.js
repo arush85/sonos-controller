@@ -1,39 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-
-function safeGet(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw === null) return fallback
-    return JSON.parse(raw)
-  } catch {
-    return fallback
-  }
-}
-
-function safeSet(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch {}
-}
+import { lsGet, lsSet } from '../lib/fileStore'
+import { buildRoomUrl } from '../lib/sonos'
 
 const POLL_INTERVAL = 6000 // ms
 
 export function useSessionWatcher({ config, onSessionStart }) {
   const [enabled, setEnabledState] = useState(() =>
-    safeGet('sonos-session-watcher-enabled', false)
+    lsGet('sonos-session-watcher-enabled', false)
   )
   const [startVolume, setStartVolumeState] = useState(() =>
-    safeGet('sonos-session-watcher-volume', 20)
+    lsGet('sonos-session-watcher-volume', 20)
   )
 
   const setEnabled = useCallback((val) => {
     setEnabledState(val)
-    safeSet('sonos-session-watcher-enabled', val)
+    lsSet('sonos-session-watcher-enabled', val)
   }, [])
 
   const setStartVolume = useCallback((val) => {
     setStartVolumeState(val)
-    safeSet('sonos-session-watcher-volume', val)
+    lsSet('sonos-session-watcher-volume', val)
   }, [])
 
   // Track previous playback state to detect transitions
@@ -50,9 +36,7 @@ export function useSessionWatcher({ config, onSessionStart }) {
 
     const poll = async () => {
       try {
-        const url = `/sonos-proxy?url=${encodeURIComponent(
-          `http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/state`
-        )}`
+        const url = buildRoomUrl(config, 'state')
         const res = await fetch(url)
         if (!res.ok) return
         const data = await res.json()

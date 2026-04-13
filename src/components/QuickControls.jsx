@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Volume2, Waves, ChevronDown, AudioLines, Music2, Link2, Unlink2 } from 'lucide-react'
+import { proxyUrl, buildBaseUrl, buildRoomUrl } from '../lib/sonos'
+import ToggleSwitch from './ToggleSwitch'
+import { sliderGradientStyle } from '../lib/utils'
 
 
 function useDebouncedApply(config, command, delay = 350) {
@@ -8,11 +11,8 @@ function useDebouncedApply(config, command, delay = 350) {
   const [lastSent, setLastSent] = useState(null)
 
   const send = useCallback(async (value) => {
-    const url = `/sonos-proxy?url=${encodeURIComponent(
-      `http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/${command}/${value}`
-    )}`
     try {
-      await fetch(url)
+      await fetch(buildRoomUrl(config, `${command}/${value}`))
     } catch {}
     setLastSent(value)
     setPending(false)
@@ -30,7 +30,6 @@ function useDebouncedApply(config, command, delay = 350) {
 }
 
 function LiveSlider({ icon: Icon, label, value, min, max, onChange, pending, unit = '' }) {
-  const pct = ((value - min) / (max - min)) * 100
   const displayVal = value > 0 && min < 0 ? `+${value}` : `${value}`
   const dragStartRef = useRef(null)
   const [delta, setDelta] = useState(null)
@@ -75,9 +74,7 @@ function LiveSlider({ icon: Icon, label, value, min, max, onChange, pending, uni
           onMouseUp={handleDragEnd}
           onTouchEnd={handleDragEnd}
           onChange={handleChange}
-          style={{
-            background: `linear-gradient(to right, var(--accent-primary) ${pct}%, var(--border) ${pct}%)`,
-          }}
+          style={sliderGradientStyle(value, min, max)}
         />
       </div>
       <div className="quick-slider-value">
@@ -117,8 +114,7 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
 
   const pollZones = useCallback(() => {
     if (!config?.host || !config?.port || !config?.room) return
-    const url = `/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/zones`)}`
-    fetch(url)
+    fetch(proxyUrl(`${buildBaseUrl(config)}/zones`))
       .then(r => r.json())
       .then(zones => {
         const zone = zones.find(z => z.members.some(m => m.roomName === config.room))
@@ -177,9 +173,9 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
     setGroupPending(true)
     try {
       if (isGrouped) {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(otherRoom)}/leave`)}`)
+        await fetch(proxyUrl(`${buildBaseUrl(config)}/${encodeURIComponent(otherRoom)}/leave`))
       } else {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/add/${encodeURIComponent(otherRoom)}`)}`)
+        await fetch(buildRoomUrl(config, `add/${encodeURIComponent(otherRoom)}`))
       }
       setTimeout(pollZones, 1000)
     } catch {}
@@ -204,10 +200,7 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
   }
 
   const sendToggle = (command, enabled) => {
-    const url = `/sonos-proxy?url=${encodeURIComponent(
-      `http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/${command}/${enabled ? 'on' : 'off'}`
-    )}`
-    fetch(url).catch(() => {})
+    fetch(buildRoomUrl(config, `${command}/${enabled ? 'on' : 'off'}`)).catch(() => {})
   }
 
   const handleSubToggle = (enabled) => {
@@ -258,15 +251,11 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
             <Waves size={14} strokeWidth={2} />
             <span>Subwoofer</span>
           </div>
-          <label className="toggle-switch" style={{ marginLeft: 'auto', flexShrink: 0 }}>
-            <input
-              type="checkbox"
-              checked={subEnabled}
-              onChange={(e) => handleSubToggle(e.target.checked)}
-            />
-            <div className="toggle-track" />
-            <div className="toggle-thumb" />
-          </label>
+          <ToggleSwitch
+            checked={subEnabled}
+            onChange={handleSubToggle}
+            style={{ marginLeft: 'auto', flexShrink: 0 }}
+          />
         </div>
         {subEnabled && (
           <LiveSlider

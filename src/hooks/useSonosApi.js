@@ -1,23 +1,15 @@
 import { useState, useCallback } from 'react'
+import { proxyUrl, buildBaseUrl, buildRoomUrl } from '../lib/sonos'
 
 function boolToOnOff(val) {
   return val ? 'on' : 'off'
-}
-
-/**
- * Routes all Sonos API calls through the Vite dev-server proxy at /sonos-proxy.
- * This avoids CORS entirely — the browser calls localhost, Node.js forwards
- * the request to the Sonos API on the local network.
- */
-function proxyUrl(targetUrl) {
-  return `/sonos-proxy?url=${encodeURIComponent(targetUrl)}`
 }
 
 async function apiGet(targetUrl) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 9000)
   try {
-    const res = await fetch(proxyUrl(targetUrl), { signal: controller.signal })
+    const res = await fetch(targetUrl, { signal: controller.signal })
     clearTimeout(timeout)
     return res
   } catch (err) {
@@ -31,11 +23,9 @@ export function useSonosApi() {
   const [testing, setTesting] = useState(false)
   const [fetchingSettings, setFetchingSettings] = useState(false)
 
-  const buildBase = (config) => `http://${config.host}:${config.port}`
-
   const testConnection = useCallback(async (config) => {
     setTesting(true)
-    const url = `${buildBase(config)}/${encodeURIComponent(config.room)}/state`
+    const url = buildRoomUrl(config, 'state')
     try {
       const res = await apiGet(url)
       if (res.status === 502) {
@@ -65,18 +55,16 @@ export function useSonosApi() {
 
   const applyProfile = useCallback(async (config, profile) => {
     setApplying(true)
-    const base = buildBase(config)
-    const room = encodeURIComponent(config.room)
 
     const commands = [
-      `${base}/${room}/volume/${profile.volume}`,
-      `${base}/${room}/bass/${profile.bass}`,
-      `${base}/${room}/treble/${profile.treble}`,
-      `${base}/${room}/nightmode/${boolToOnOff(profile.nightMode)}`,
-      `${base}/${room}/speechenhancement/${boolToOnOff(profile.speechEnhancement)}`,
-      `${base}/${room}/sub/${profile.subwooferEnabled !== false ? 'on' : 'off'}`,
+      buildRoomUrl(config, `volume/${profile.volume}`),
+      buildRoomUrl(config, `bass/${profile.bass}`),
+      buildRoomUrl(config, `treble/${profile.treble}`),
+      buildRoomUrl(config, `nightmode/${boolToOnOff(profile.nightMode)}`),
+      buildRoomUrl(config, `speechenhancement/${boolToOnOff(profile.speechEnhancement)}`),
+      buildRoomUrl(config, `sub/${profile.subwooferEnabled !== false ? 'on' : 'off'}`),
       ...(profile.subwooferEnabled !== false
-        ? [`${base}/${room}/sub/gain/${profile.subwooferGain}`]
+        ? [buildRoomUrl(config, `sub/gain/${profile.subwooferGain}`)]
         : []),
     ]
 
@@ -113,10 +101,8 @@ export function useSonosApi() {
 
   const fetchCurrentSettings = useCallback(async (config) => {
     setFetchingSettings(true)
-    const base = buildBase(config)
-    const room = encodeURIComponent(config.room)
     try {
-      const res = await apiGet(`${base}/${room}/state`)
+      const res = await apiGet(buildRoomUrl(config, 'state'))
       if (!res.ok && res.status >= 500) {
         return { ok: false, message: `Failed to fetch state (${res.status})` }
       }

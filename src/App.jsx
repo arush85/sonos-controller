@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History } from 'lucide-react'
+import ToggleSwitch from './components/ToggleSwitch'
+import { sliderGradientStyle } from './lib/utils'
 
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
@@ -498,15 +500,10 @@ export default function App() {
                       Sets volume when playback begins (e.g. TV turns on)
                     </div>
                   </div>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={sessionEnabled}
-                      onChange={(e) => handleSessionEnabledChange(e.target.checked)}
-                    />
-                    <div className="toggle-track" />
-                    <div className="toggle-thumb" />
-                  </label>
+                  <ToggleSwitch
+                    checked={sessionEnabled}
+                    onChange={handleSessionEnabledChange}
+                  />
                 </div>
                 {sessionEnabled && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -522,7 +519,7 @@ export default function App() {
                       onChange={(e) => handleStartVolumeChange(Number(e.target.value))}
                       style={{
                         flex: 1,
-                        background: `linear-gradient(to right, var(--accent-primary) ${startVolume}%, var(--border) ${startVolume}%)`,
+                        ...sliderGradientStyle(startVolume, 0, 100),
                       }}
                     />
                     <span style={{ fontSize: 13, color: 'var(--accent-primary)', width: 28, textAlign: 'right', flexShrink: 0 }}>

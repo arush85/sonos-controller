@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
+import { loadStore, saveKey, lsGet, lsSet, genId } from '../lib/fileStore'
 
 const DEFAULT_CONFIG = {
   host: 'localhost',
@@ -42,10 +42,6 @@ const DEFAULT_PROFILES = [
     speechEnhancement: false,
   },
 ]
-
-function genId() {
-  return 'profile-' + Math.random().toString(36).slice(2, 10)
-}
 
 export function useProfiles() {
   // Initialise from localStorage for instant load (no async flash)
@@ -109,7 +105,7 @@ export function useProfiles() {
   }, [])
 
   const addProfile = useCallback((profileData) => {
-    const newProfile = { ...profileData, id: genId() }
+    const newProfile = { ...profileData, id: genId('profile') }
     setProfiles((prev) => [...prev, newProfile])
     return newProfile
   }, [setProfiles])

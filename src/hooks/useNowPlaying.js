@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { proxyUrl, buildBaseUrl } from '../lib/sonos'
 
 const POLL_PLAYING = 2000
 const POLL_PAUSED  = 3000
@@ -20,9 +21,7 @@ export function useNowPlaying({ config, enabled = true }) {
       try {
         // Use /zones so we get groupState.volume AND can extract the device base URL
         // (needed to construct per-track art URLs via the Sonos device's /getaa endpoint)
-        const url = `/sonos-proxy?url=${encodeURIComponent(
-          `http://${config.host}:${config.port}/zones`
-        )}`
+        const url = proxyUrl(`${buildBaseUrl(config)}/zones`)
         const res = await fetch(url)
         if (!res.ok) return
         const zones = await res.json()
