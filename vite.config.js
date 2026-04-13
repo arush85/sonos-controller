@@ -52,7 +52,16 @@ function sonosStorePlugin() {
               const existing = await fs.promises.readFile(DATA_FILE, 'utf8')
                 .then(raw => JSON.parse(raw))
                 .catch(() => ({}))
-              await fs.promises.writeFile(DATA_FILE, JSON.stringify({ ...existing, ...updates }, null, 2))
+
+              // Security: Prevent prototype pollution
+              for (const key in updates) {
+                if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                  continue
+                }
+                existing[key] = updates[key]
+              }
+
+              await fs.promises.writeFile(DATA_FILE, JSON.stringify(existing, null, 2))
               res.statusCode = 200
               res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify({ ok: true }))
