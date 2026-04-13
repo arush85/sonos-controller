@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
-
-function genId() {
-  return 'sched-' + Math.random().toString(36).slice(2, 10)
-}
+import { loadStore, saveKey, lsGet, lsSet, genId } from '../lib/fileStore'
 
 export function getNextActivation(schedule) {
   if (!schedule.enabled) return null
@@ -64,7 +60,7 @@ export function useScheduler({ profiles, config, applyProfile, onAutoApply }) {
   }, [])
 
   const addSchedule = useCallback((data) => {
-    const schedule = { ...data, id: genId() }
+    const schedule = { ...data, id: genId('sched') }
     setSchedules((prev) => [...prev, schedule])
     return schedule
   }, [setSchedules])

@@ -2,7 +2,13 @@
   "name": "sonos-arc-controller",
   "version": "1.3.0",
   "description": "Local web app for controlling Sonos speakers with audio profiles, scheduling, and session detection",
-  "keywords": ["sonos", "arc", "audio", "controller", "home-audio"],
+  "keywords": [
+    "sonos",
+    "arc",
+    "audio",
+    "controller",
+    "home-audio"
+  ],
   "license": "CC-BY-NC-4.0",
   "type": "module",
   "scripts": {
@@ -13,12 +19,13 @@
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
-    "node-sonos-http-api": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
     "vite": "^6.4.2"
   },
   "overrides": {

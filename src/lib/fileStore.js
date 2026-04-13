@@ -35,3 +35,7 @@ export function lsSet(key, value) {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {}
 }
+
+export function genId(prefix = 'id') {
+  return prefix + '-' + Math.random().toString(36).slice(2, 10)
+}

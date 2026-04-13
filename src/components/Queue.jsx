@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Music2 } from 'lucide-react'
 import { resolveArt } from '../lib/sonosArt'
+import { buildRoomUrl } from '../lib/sonos'
 
 function QueueTrack({ track, index, isCurrent, deviceBase }) {
   const artSrc = resolveArt(track, deviceBase)
@@ -34,10 +35,7 @@ export default function Queue({ config, deviceBase, currentTrackNo, playbackStat
     abortRef.current?.abort()
     abortRef.current = new AbortController()
     try {
-      const room = encodeURIComponent(config.room)
-      const url = `/sonos-proxy?url=${encodeURIComponent(
-        `http://${config.host}:${config.port}/${room}/queue/200`
-      )}`
+      const url = buildRoomUrl(config, 'queue/200')
       const res = await fetch(url, { signal: abortRef.current.signal })
       if (!res.ok) return
       const data = await res.json()

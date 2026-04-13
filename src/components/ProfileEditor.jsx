@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import ToggleSwitch from './ToggleSwitch'
+import { sliderGradientStyle } from '../lib/utils'
 
 const EMPTY_PROFILE = {
   name: '',
@@ -13,8 +15,6 @@ const EMPTY_PROFILE = {
 }
 
 function Slider({ label, value, min, max, step = 1, onChange, unit = '' }) {
-  const pct = ((value - min) / (max - min)) * 100
-
   return (
     <div className="slider-group">
       <div className="slider-header">
@@ -31,9 +31,7 @@ function Slider({ label, value, min, max, step = 1, onChange, unit = '' }) {
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          style={{
-            background: `linear-gradient(to right, var(--accent-primary) ${pct}%, var(--border) ${pct}%)`,
-          }}
+          style={sliderGradientStyle(value, min, max)}
         />
       </div>
       <div className="slider-range-labels">
@@ -51,15 +49,7 @@ function Toggle({ label, description, checked, onChange }) {
         <div className="toggle-label">{label}</div>
         {description && <div className="toggle-desc">{description}</div>}
       </div>
-      <label className="toggle-switch">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-        />
-        <div className="toggle-track" />
-        <div className="toggle-thumb" />
-      </label>
+      <ToggleSwitch checked={checked} onChange={onChange} />
     </div>
   )
 }

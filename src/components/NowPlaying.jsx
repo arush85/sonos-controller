@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Music2, SkipBack, SkipForward, Play, Pause, ListMusic } from 'lucide-react'
 import { resolveArt } from '../lib/sonosArt'
+import { buildRoomUrl } from '../lib/sonos'
 
 function EqBars() {
   return (
@@ -23,8 +24,7 @@ function TransportControls({ config, playbackState, onAction }) {
     busyRef.current = true
     setBusy(true)
     try {
-      const room = encodeURIComponent(config.room)
-      await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${room}/${action}`)}`)
+      await fetch(buildRoomUrl(config, action))
       const isTrackChange = action === 'next' || action === 'previous'
       timersRef.current.push(setTimeout(onAction, isTrackChange ? 500 : 400))
       if (isTrackChange) timersRef.current.push(setTimeout(onAction, 1500))
