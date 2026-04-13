@@ -5,7 +5,7 @@ function genId() {
   return 'sched-' + Math.random().toString(36).slice(2, 10)
 }
 
-export function getNextActivation(schedule) {
+function getNextActivation(schedule) {
   if (!schedule.enabled) return null
   const now = new Date()
   const [hh, mm] = schedule.time.split(':').map(Number)
