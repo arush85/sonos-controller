@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { Music2 } from 'lucide-react'
 import { resolveArt } from '../lib/sonosArt'
 
-function QueueTrack({ track, index, isCurrent, deviceBase }) {
+// ⚡ Bolt: Wrapped in React.memo to prevent unnecessary re-renders of the potentially long track list
+const QueueTrack = memo(function QueueTrack({ track, index, isCurrent, deviceBase }) {
   const artSrc = resolveArt(track, deviceBase)
 
   return (
@@ -22,7 +23,7 @@ function QueueTrack({ track, index, isCurrent, deviceBase }) {
       </div>
     </div>
   )
-}
+})
 
 export default function Queue({ config, deviceBase, currentTrackNo, playbackState }) {
   const [tracks, setTracks]   = useState([])

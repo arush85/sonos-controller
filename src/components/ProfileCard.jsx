@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { Pencil, Trash2, Play } from 'lucide-react'
 
-export default function ProfileCard({
+// ⚡ Bolt: Wrapped in React.memo to prevent unnecessary re-renders in the profiles grid
+const ProfileCard = memo(function ProfileCard({
   profile,
   isActive,
   isAutoApplied,
@@ -136,4 +137,6 @@ export default function ProfileCard({
       </div>
     </div>
   )
-}
+})
+
+export default ProfileCard

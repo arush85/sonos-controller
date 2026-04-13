@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Trash2 } from 'lucide-react'
 
 function formatTimestamp(ts) {
@@ -26,7 +27,8 @@ function formatValue(value) {
   return String(value)
 }
 
-function LogEntry({ entry }) {
+// ⚡ Bolt: Wrapped in React.memo to prevent unnecessary re-renders when parent lists update
+const LogEntry = memo(function LogEntry({ entry }) {
   const typeLabelMap = {
     profile_applied: 'Profile',
     schedule_fired: 'Schedule',
@@ -55,7 +57,7 @@ function LogEntry({ entry }) {
       </div>
     </div>
   )
-}
+})
 
 export default function ActivityLog({ entries, onClear }) {
   return (
